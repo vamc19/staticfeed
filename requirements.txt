@@ -1,0 +1,3 @@
+feedparser==6.0.8
+listparser==0.18
+sgmllib3k==1.0.0
