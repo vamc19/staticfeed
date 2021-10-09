@@ -17,9 +17,9 @@ class SubscriptionException(Exception):
 
 
 class Subscription:
-    def __init__(self, url: str, cache_root: str, max_entries: int = 10) -> None:
+    def __init__(self, url: str, cache_root: str, num_entries: int = 10) -> None:
         self.url = url.strip('/')
-        self.max_entries = max_entries
+        self.num_entries = num_entries
         cache_root = os.path.abspath(cache_root)
         subscription_id = hashlib.sha256(self.url.encode('utf8')).hexdigest()
 
@@ -68,7 +68,7 @@ class Subscription:
         cached_entries = self._cache.get('entries', [])
 
         inserted_entries = set()
-        for entry in fresh_entries[:self.max_entries]:
+        for entry in fresh_entries[:self.num_entries]:
             entries.append({
                 'title': entry.title,
                 'url': entry.link,
@@ -77,10 +77,11 @@ class Subscription:
             })
             inserted_entries.update(entry.id)
 
-        while len(entries) < self.max_entries:
-            for cached_entry in cached_entries:
-                if cached_entry['id'] not in inserted_entries:
-                    entries.append(cached_entry)
+        for cached_entry in cached_entries:
+            if len(entries) >= self.num_entries:
+                break
+            if cached_entry['id'] not in inserted_entries:
+                entries.append(cached_entry)
 
         self._cache['entries'] = entries
 
