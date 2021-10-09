@@ -34,7 +34,7 @@ class Subscription:
             if status['code'] == 410:
                 logger.warning(f'{self.url} returned status 410 in a previous run. Feed will not be updated')
 
-    def get_posts(self) -> List[dict]:
+    def get_entries(self) -> List[dict]:
         return self._cache.get('entries', [])
 
     def refresh(self):
@@ -45,7 +45,7 @@ class Subscription:
         feed = feedparser.parse(self.url, etag=etag, modified=last_modified)
 
         if feed.status == 301:  # permanent redirect, update url and continue
-            logger.debug(f'{self.url} is permanently redirected to {feed.href}')
+            logger.info(f'{self.url} is permanently redirected to {feed.href}')
             self._update_feed_status(feed)
         elif feed.status == 304:  # no changes since last update
             logger.debug(f'No changes to the feed {self.url} since last refresh')
@@ -75,7 +75,7 @@ class Subscription:
                 'id': entry.id,
                 'updated_time': time.strftime('%Y-%m-%dT%H:%M:%S', last_updated(entry))
             })
-            inserted_entries.update(entry.id)
+            inserted_entries.add(entry.id)
 
         for cached_entry in cached_entries:
             if len(entries) >= self.num_entries:
