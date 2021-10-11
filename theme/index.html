@@ -1,17 +1,70 @@
 <html lang="en">
 <head>
     <title>Static Feed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        .container {
+            margin-left: auto;
+            margin-right: auto;
+            font-family: system-ui;
+        }
+        .entry-list {
+            width: 100%;
+        }
+        .entry {
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px dashed #222;
+        }
+        .entry-title {
+            width: 100%;
+        }
+        .entry-details {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
+            font-size: small;
+            margin-top: 5px;
+        }
+        .entry-details .entry-date {
+            text-align: right;
+        }
+        .next-page {
+            text-align: center;
+        }
+
+        @media (min-width: 1200px) {
+            .container { max-width: 960px; }
+        }
+        @media (max-width: 768px) {
+            .container { max-width: 100%; }
+        }
+    </style>
 </head>
 <body>
-    <ul>
-        {% for entry in entries %}
-            <li>
-                <a href="{{ entry.url }}">{{ entry.title }}</a>
-            </li>
-        {% endfor %}
-    </ul>
-    {% if next_page %}
-        <a href="{{ next_page }}"> Next Page </a>
-    {% endif %}
+    <div class="container">
+        <div class="entry-list">
+            {% for entry in entries %}
+                <div class="entry">
+                    <div class="entry-title">
+                        <a href="{{ entry.url }}">{{ entry.title }}</a>
+                    </div>
+                    <div class="entry-details">
+                        <span> {{ entry.subscription_title }} </span>
+                        <time class="entry-date"> {{ entry.updated_on }} </time>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if next_page %}
+                <div class="next-page">
+                    <a href="{{ next_page }}"> Next Page </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>
