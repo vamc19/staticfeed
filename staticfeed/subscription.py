@@ -21,9 +21,9 @@ class Subscription:
         self.url = url.strip('/')
         self.num_entries = num_entries
         cache_root = os.path.abspath(cache_root)
-        subscription_id = hashlib.sha256(self.url.encode('utf8')).hexdigest()
+        self.subscription_id = hashlib.sha256(self.url.encode('utf8')).hexdigest()
 
-        self._cache_file_path = os.path.join(cache_root, subscription_id) + '.json'
+        self._cache_file_path = os.path.join(cache_root, self.subscription_id) + '.json'
         self._cache = self._read_cache()
 
         if 'feed_status' in self._cache:
@@ -36,6 +36,9 @@ class Subscription:
 
     def get_entries(self) -> List[dict]:
         return self._cache.get('entries', [])
+
+    def get_title(self) -> str:
+        return self._cache.get('title')
 
     def refresh(self):
         logger.debug(f'Refreshing {self.url}')
@@ -55,6 +58,7 @@ class Subscription:
             self._update_feed_status(feed)
 
         if feed.status in [200, 301]:
+            self._cache['title'] = feed.feed.title
             self._merge_feed_with_cache(feed.entries)
             self._cache['feed_etag'] = feed.get('etag')
             self._cache['feed_last_modified'] = feed.get('modified')
@@ -73,7 +77,10 @@ class Subscription:
                 'title': entry.title,
                 'url': entry.link,
                 'id': entry.id,
-                'updated_time': time.strftime('%Y-%m-%dT%H:%M:%S', last_updated(entry))
+                'updated_on': time.strftime('%Y-%m-%dT%H:%M:%S', last_updated(entry)),
+                # The following 2 should not be here. Code smell. Problem for another day
+                'subscription_id': self.subscription_id,
+                'subscription_title': self.get_title()
             })
             inserted_entries.add(entry.id)
 

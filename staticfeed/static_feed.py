@@ -1,7 +1,6 @@
 import os.path
-import tempfile
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 import listparser
 from jinja2 import Environment, FileSystemLoader
@@ -18,7 +17,7 @@ class StaticFeed:
         self.theme_dir = os.path.abspath(theme_dir)
         self.entries_per_feed = entries_per_feed
         self.entries_per_page = entries_per_page
-        self.subscriptions: List[Subscription] = self._read_subscriptions()
+        self.subscriptions: Dict[str, Subscription] = self._read_subscriptions()
 
         self._env = Environment(loader=FileSystemLoader(self.theme_dir))
 
@@ -28,22 +27,22 @@ class StaticFeed:
             if not os.path.exists(folder):
                 os.makedirs(folder)
 
-    def _read_subscriptions(self) -> List[Subscription]:
-        subscriptions = []
+    def _read_subscriptions(self) -> Dict[str, Subscription]:
+        subscriptions = {}
         opml = listparser.parse(self.opml_path)
         for feed in opml.feeds:
             subscription = Subscription(feed.url, self.cache_dir, self.entries_per_feed)
-            subscriptions.append(subscription)
+            subscriptions[subscription.subscription_id] = subscription
 
         return subscriptions
 
     def refresh(self):
-        for subscription in self.subscriptions:
+        for subscription in self.subscriptions.values():
             subscription.refresh()
             self.entries.extend(subscription.get_entries())
 
         # easiest thing to do for now
-        self.entries.sort(key=lambda e: datetime.fromisoformat(e['updated_time']), reverse=True)
+        self.entries.sort(key=lambda e: datetime.fromisoformat(e['updated_on']), reverse=True)
 
     def generate_html(self):
         template = self._env.get_template('index.html')
