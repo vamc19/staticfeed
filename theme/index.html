@@ -40,6 +40,13 @@
             font-size: small;
             margin-top: 5px;
         }
+        .entry-details .entry-sub a {
+            text-decoration: none;
+            color: black;
+        }
+        .entry-details .entry-sub a:hover {
+            text-decoration: underline;
+        }
         .entry-details .entry-date {
             text-align: right;
         }
@@ -79,7 +86,7 @@
                         <a href="{{ entry.url }}">{{ entry.title }}</a>
                     </div>
                     <div class="entry-details">
-                        <span> {{ entry.subscription_title }} </span>
+                        <span class="entry-sub"> <a href="{{ entry.subscription_id }}.html"> {{ entry.subscription_title }}</a> </span>
                         <time class="entry-date"> {{ entry.updated_on }} </time>
                     </div>
                 </div>
