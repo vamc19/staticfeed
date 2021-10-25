@@ -52,7 +52,6 @@ class Subscription:
             self._update_feed_status(feed)
         elif feed.status == 304:  # no changes since last update
             logger.debug(f'No changes to the feed {self.url} since last refresh')
-            self._cache['last_refresh'] = datetime.now(timezone.utc).isoformat()
         elif feed.status == 410:  # gone
             logger.warning(f'Feed {self.url} no longer exists. It will not be updated anymore')
             self._update_feed_status(feed)
@@ -63,6 +62,7 @@ class Subscription:
             self._cache['feed_etag'] = feed.get('etag')
             self._cache['feed_last_modified'] = feed.get('modified')
 
+        self._cache['last_refresh'] = datetime.now(timezone.utc).isoformat()
         self._save_cache_file()
 
     def _merge_feed_with_cache(self, fresh_entries: List[FeedParserDict]):

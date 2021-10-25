@@ -1,6 +1,6 @@
 import os.path
-from datetime import datetime
-from typing import List, Dict
+from datetime import datetime, timezone
+from typing import Dict
 
 import listparser
 from jinja2 import Environment, FileSystemLoader
@@ -52,6 +52,9 @@ class StaticFeed:
         for path in os.listdir(self.output_dir):
             os.remove(os.path.join(self.output_dir, path))
 
+        page_title = "Latest Feed"
+        page_subtitle = ""
+        footer = f"Last refreshed on {datetime.now(timezone.utc).strftime('%a %d %b, %Y at %H:%M %Z')}"
         index_start = 0
         page_num = 1
         while index_start < len(self.entries):
@@ -59,7 +62,8 @@ class StaticFeed:
             page_entries = self.entries[index_start:index_end]
             next_page = f'{page_num + 1}.html' if index_end < len(self.entries) else None
 
-            html = template.render(entries=page_entries, next_page=next_page)
+            html = template.render(page_title=page_title, page_subtitle=page_subtitle,
+                                   entries=page_entries, next_page=next_page, footer=footer)
             file_name = 'index.html' if page_num == 1 else f'{page_num}.html'
             with open(os.path.join(self.output_dir, file_name), 'w') as page:
                 page.write(html)
